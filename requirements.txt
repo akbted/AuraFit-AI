@@ -1,9 +1,8 @@
-torch 
-torchvision 
-torchaudio
-ultralytics 
+ultralytics
+opencv-python
+pydantic-settings
+fastapi 
+uvicorn 
+websockets 
 opencv-python 
 numpy
-streamlit
-streamlit-webrtc
-watchdog
