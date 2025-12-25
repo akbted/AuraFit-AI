@@ -34,22 +34,22 @@ class PlankMonitor:
         self.MIN_PLANK_ANGLE = 160
         self.MAX_PLANK_ANGLE = 195
 
-        # Hip height threshold: hip must be at least this % of torso length ABOVE ankle level
-        # Positive = hip is above ankle (correct plank)
-        # This prevents detecting standing person as plank
-        self.MIN_HIP_HEIGHT_RATIO = 0.1  # Hip must be at least 10% above ankle level
+        # Body orientation: ratio of horizontal span to vertical span
+        # For plank: body is mostly horizontal (ratio > 1.5)
+        # For standing: body is mostly vertical (ratio < 0.5)
+        self.MIN_HORIZONTAL_RATIO = 1.2  # Body must be more horizontal than vertical
         
         # Grace period
         self.GRACE_SECONDS = 1.5
         
         # Smoothing
         self.angle_buffer = deque(maxlen=5)
-        self.height_buffer = deque(maxlen=5)
+        self.orientation_buffer = deque(maxlen=5)
         
         # Track last known values
         self.last_angle = None
         self.last_side = None
-        self.last_hip_ratio = None
+        self.last_orientation_ratio = None
 
     def process_frame(self, frame):
         """Process frame with tracking"""
@@ -73,38 +73,36 @@ class PlankMonitor:
         self.angle_buffer.append(angle)
         return np.median(self.angle_buffer)
 
-    def get_smoothed_height(self, ratio):
-        """Apply smoothing to height ratio"""
-        self.height_buffer.append(ratio)
-        return np.median(self.height_buffer)
+    def get_smoothed_orientation(self, ratio):
+        """Apply smoothing to orientation ratio"""
+        self.orientation_buffer.append(ratio)
+        return np.median(self.orientation_buffer)
 
-    def _calculate_hip_height_ratio(self, keypoints, hip_idx, ankle_idx, shoulder_idx):
+    def _calculate_body_orientation(self, keypoints, shoulder_idx, ankle_idx):
         """
-        Calculate how high the hip is above the ankle reference line.
+        Calculate body orientation as horizontal_span / vertical_span.
         
-        In image coordinates, Y increases downward, so:
-        - ankle_y > hip_y means hip is ABOVE ankle (good for plank)
-        - We normalize by shoulder-ankle distance for scale invariance
-        
-        Returns positive value if hip is above ankle level.
+        Returns:
+        - > 1.5: Body is horizontal (plank position)
+        - < 0.5: Body is vertical (standing)
+        - Between: Transitional pose
         """
-        hip = keypoints[hip_idx]
-        ankle = keypoints[ankle_idx]
         shoulder = keypoints[shoulder_idx]
+        ankle = keypoints[ankle_idx]
         
-        # Height difference: positive if hip is above ankle (smaller Y)
-        height_diff = ankle[1] - hip[1]  # Positive when hip is higher
+        horizontal_span = abs(shoulder[0] - ankle[0])
+        vertical_span = abs(shoulder[1] - ankle[1])
         
-        # Normalize by body length (shoulder to ankle distance)
-        body_length = np.linalg.norm(shoulder - ankle)
+        # Avoid division by zero
+        if vertical_span < 10:
+            return 999.0  # Very horizontal
+        if horizontal_span < 10:
+            return 0.01   # Very vertical
         
-        if body_length < 10:
-            return 0
-        
-        return height_diff / body_length
+        return horizontal_span / vertical_span
 
     def _best_side_and_metrics(self, keypoints, conf):
-        """Get the best visible side and calculate hip angle + height ratio"""
+        """Get the best visible side and calculate hip angle + orientation"""
         left_ids = [self.L_SHOULDER, self.L_HIP, self.L_ANKLE]
         right_ids = [self.R_SHOULDER, self.R_HIP, self.R_ANKLE]
 
@@ -116,44 +114,44 @@ class PlankMonitor:
             h = keypoints[self.R_HIP]
             a = keypoints[self.R_ANKLE]
             angle = self.calculate_angle(s, h, a)
-            hip_ratio = self._calculate_hip_height_ratio(keypoints, self.R_HIP, self.R_ANKLE, self.R_SHOULDER)
-            return angle, hip_ratio, "right", right_ids
+            orientation = self._calculate_body_orientation(keypoints, self.R_SHOULDER, self.R_ANKLE)
+            return angle, orientation, "right", right_ids
         if left_ok:
             s = keypoints[self.L_SHOULDER]
             h = keypoints[self.L_HIP]
             a = keypoints[self.L_ANKLE]
             angle = self.calculate_angle(s, h, a)
-            hip_ratio = self._calculate_hip_height_ratio(keypoints, self.L_HIP, self.L_ANKLE, self.L_SHOULDER)
-            return angle, hip_ratio, "left", left_ids
+            orientation = self._calculate_body_orientation(keypoints, self.L_SHOULDER, self.L_ANKLE)
+            return angle, orientation, "left", left_ids
 
         return None, None, None, None
 
-    def _is_good_plank(self, angle, hip_ratio):
+    def _is_good_plank(self, angle, orientation_ratio):
         """
         Check if pose indicates good plank form.
         Must satisfy BOTH conditions:
         1. Body angle is within threshold (straight line)
-        2. Hip is above ankle reference line (not standing upright)
+        2. Body is horizontal (not standing upright)
         """
-        if angle is None or hip_ratio is None:
+        if angle is None or orientation_ratio is None:
             return False
         
         angle_ok = self.MIN_PLANK_ANGLE <= angle <= self.MAX_PLANK_ANGLE
-        hip_position_ok = hip_ratio > self.MIN_HIP_HEIGHT_RATIO
+        is_horizontal = orientation_ratio > self.MIN_HORIZONTAL_RATIO
         
-        return angle_ok and hip_position_ok
+        return angle_ok and is_horizontal
 
-    def _get_form_feedback(self, angle, hip_ratio):
+    def _get_form_feedback(self, angle, orientation_ratio):
         """Get specific feedback about form issues"""
-        if angle is None or hip_ratio is None:
+        if angle is None or orientation_ratio is None:
             return "Position yourself in frame", (150, 150, 150)
         
-        # Check hip position first (most important)
-        if hip_ratio <= self.MIN_HIP_HEIGHT_RATIO:
-            if hip_ratio < -0.1:
-                return "Get into plank position (lying down)", (66, 135, 245)
+        # Check orientation first (most important)
+        if orientation_ratio <= self.MIN_HORIZONTAL_RATIO:
+            if orientation_ratio < 0.5:
+                return "Get down into plank position", (66, 135, 245)
             else:
-                return "Hips too low - lift them up!", (66, 135, 245)
+                return "Lower your body - get horizontal", (66, 135, 245)
         
         # Then check angle
         if angle < self.MIN_PLANK_ANGLE:
@@ -174,25 +172,25 @@ class PlankMonitor:
         keypoints = results[0].keypoints.xy[0].cpu().numpy()
         conf = results[0].keypoints.conf[0].cpu().numpy()
 
-        raw_angle, raw_hip_ratio, side, indices = self._best_side_and_metrics(keypoints, conf)
+        raw_angle, raw_orientation, side, indices = self._best_side_and_metrics(keypoints, conf)
         now = time.time()
 
-        if raw_angle is not None and raw_hip_ratio is not None:
+        if raw_angle is not None and raw_orientation is not None:
             smoothed_angle = self.get_smoothed_angle(raw_angle)
-            smoothed_hip_ratio = self.get_smoothed_height(raw_hip_ratio)
+            smoothed_orientation = self.get_smoothed_orientation(raw_orientation)
             
             self.last_angle = smoothed_angle
             self.last_side = side
-            self.last_hip_ratio = smoothed_hip_ratio
+            self.last_orientation_ratio = smoothed_orientation
             
             # Debug output
-            print(f"DEBUG: Angle={smoothed_angle:.1f}° | HipRatio={smoothed_hip_ratio:.2f} | Side={side} | State={'PLANK' if self.in_plank else 'REST'}")
+            print(f"DEBUG: Angle={smoothed_angle:.1f}° | Orientation={smoothed_orientation:.2f} | Side={side} | State={'PLANK' if self.in_plank else 'REST'}")
 
-            if self._is_good_plank(smoothed_angle, smoothed_hip_ratio):
+            if self._is_good_plank(smoothed_angle, smoothed_orientation):
                 if not self.in_plank:
                     self.in_plank = True
                     self.plank_start_time = now
-                    print(f"✓ Plank STARTED | angle={smoothed_angle:.1f}° | hip_ratio={smoothed_hip_ratio:.2f}")
+                    print(f"✓ Plank STARTED | angle={smoothed_angle:.1f}° | orientation={smoothed_orientation:.2f}")
                 self.last_valid_time = now
             else:
                 self._check_grace_period(now)
@@ -205,7 +203,7 @@ class PlankMonitor:
             self.current_elapsed = 0.0
 
         state = "PLANK" if self.in_plank else "REST"
-        return state, self.current_elapsed, self.last_angle, self.last_hip_ratio, indices
+        return state, self.current_elapsed, self.last_angle, self.last_orientation_ratio, indices
 
     def _handle_no_detection(self):
         """Handle frames with no person detected"""
@@ -309,7 +307,7 @@ class PlankMonitor:
         
         return frame
 
-    def draw_overlay(self, frame, state, elapsed, angle=None, hip_ratio=None):
+    def draw_overlay(self, frame, state, elapsed, angle=None, orientation_ratio=None):
         """Draw modern UI overlay with timer and state"""
         h, w = frame.shape[:2]
         
@@ -349,16 +347,16 @@ class PlankMonitor:
         cv2.putText(frame, state, (x1 + 20, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2, cv2.LINE_AA)
         
-        # Show angle and hip ratio
+        # Show angle and orientation ratio
         if angle is not None:
             cv2.putText(frame, f"Angle: {int(angle)}deg", (x1 + 20, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
-        if hip_ratio is not None:
-            cv2.putText(frame, f"Hip: {hip_ratio:.2f}", (x1 + 130, 75),
+        if orientation_ratio is not None:
+            cv2.putText(frame, f"H/V: {orientation_ratio:.2f}", (x1 + 130, 75),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
         
         # Form feedback (bottom)
-        feedback, fb_color = self._get_form_feedback(angle, hip_ratio)
+        feedback, fb_color = self._get_form_feedback(angle, orientation_ratio)
         
         text_size = cv2.getTextSize(feedback, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)[0]
         box_x1 = (w - text_size[0]) // 2 - 20
@@ -382,14 +380,14 @@ class PlankMonitor:
                 return None
             
             frame = results[0].orig_img.copy()
-            state, elapsed, angle, hip_ratio, indices = self.update_plank_state(results)
+            state, elapsed, angle, orientation_ratio, indices = self.update_plank_state(results)
             
             if indices is not None and hasattr(results[0], 'keypoints') and len(results[0].keypoints) > 0:
                 keypoints = results[0].keypoints.xy[0].cpu().numpy()
                 conf = results[0].keypoints.conf[0].cpu().numpy()
                 frame = self.draw_skeleton(frame, keypoints, conf, indices)
             
-            frame = self.draw_overlay(frame, state, elapsed, angle, hip_ratio)
+            frame = self.draw_overlay(frame, state, elapsed, angle, orientation_ratio)
             return frame
             
         except Exception as e:
@@ -415,10 +413,10 @@ class PlankMonitor:
         self.total_plank_time = 0.0
         self.best_duration = 0.0
         self.angle_buffer.clear()
-        self.height_buffer.clear()
+        self.orientation_buffer.clear()
         self.last_angle = None
         self.last_side = None
-        self.last_hip_ratio = None
+        self.last_orientation_ratio = None
 
 
 if __name__ == "__main__":
