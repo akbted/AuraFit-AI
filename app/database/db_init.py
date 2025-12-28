@@ -1,6 +1,16 @@
 import psycopg2
 import os
 from app.config.settings import setting
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("logs/db_logs.log"), # Writes to a file
+        logging.StreamHandler()         # Also prints to console
+    ]
+)
 
 class DBManger:
     def __init__(self):
@@ -10,6 +20,7 @@ class DBManger:
         self.port = setting.DB_PORT
         self.dbname = setting.DB_NAME
         self.connection = None
+        self.schemas = setting.DB_SCHEMA
 
     def db_connection_test(self):
         try:
@@ -20,7 +31,7 @@ class DBManger:
                 port = self.port,
                 dbname = self.dbname
             )
-            print("Connect successful!")
+            logging.info("Connect successful!")
 
             if self.connection:
                 cursor = self.connection.cursor()
@@ -39,16 +50,27 @@ class DBManger:
         try:
             if self.connection:
                 self.connection.close()
-                print("Connection closed.")
+                logging.info("Connection closed.")
 
         except Exception as e:
             print(f"Failed to close connection: {e}")
 
     def create_tables(self):
         try:
-            pass 
+            # List all the schemas
+            logging.info(f"List of Schemas: {os.listdir(self.schemas)}")
+            list_schema_path = [os.path.abspath(os.path.join(self.schemas, item)) for item in os.listdir(self.schemas)]
+            for schema in list_schema_path:
+                with open(os.path.abspath(schema), "r") as f:
+                    sql = f.read()
+                    cursor = self.connection.cursor()
+                    cursor.execute(sql)
+                    self.connection.commit()
+                    cursor.close()
+            logging.info(msg=f"Created tables based on {os.listdir(self.schemas)}")
+
         except Exception as e:
-            print(f"Failed to create tables: {e}")
+            logging.info(f"Failed to create tables: {e}")
 
     def drop_tables(self, table_name):
         try:
@@ -68,6 +90,9 @@ if __name__ == "__main__":
 
     # Testing DB Connection
     db_init.db_connection_test()
+
+    # Creating Tables
+    db_init.create_tables()
 
     # Closing the DB Connection
     db_init.close_connection()
