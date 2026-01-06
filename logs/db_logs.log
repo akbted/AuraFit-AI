@@ -1,0 +1,51 @@
+2025-12-29 04:01:07,191 - INFO - Connect successful!
+2025-12-29 04:01:07,441 - INFO - Connection closed.
+2025-12-29 04:01:07,451 - INFO - List of Schema['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:04:43,525 - INFO - Connect successful!
+2025-12-29 04:04:43,778 - INFO - Connection closed.
+2025-12-29 04:04:43,781 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:06:40,896 - INFO - Connect successful!
+2025-12-29 04:06:41,152 - INFO - Connection closed.
+2025-12-29 04:06:41,154 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:07:42,297 - INFO - Connect successful!
+2025-12-29 04:07:42,517 - INFO - Connection closed.
+2025-12-29 04:07:42,520 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:07:50,527 - INFO - Connect successful!
+2025-12-29 04:07:50,734 - INFO - Connection closed.
+2025-12-29 04:07:50,735 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:08:11,698 - INFO - Connect successful!
+2025-12-29 04:08:11,944 - INFO - Connection closed.
+2025-12-29 04:08:11,945 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:09:18,801 - INFO - Connect successful!
+2025-12-29 04:09:19,013 - INFO - Connection closed.
+2025-12-29 04:09:19,017 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:11:09,757 - INFO - Connect successful!
+2025-12-29 04:11:10,001 - INFO - Connection closed.
+2025-12-29 04:11:10,006 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:13:49,613 - INFO - Connect successful!
+2025-12-29 04:13:49,966 - INFO - Connection closed.
+2025-12-29 04:13:49,967 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:14:12,744 - INFO - Connect successful!
+2025-12-29 04:14:12,979 - INFO - Connection closed.
+2025-12-29 04:14:12,979 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:14:36,116 - INFO - Connect successful!
+2025-12-29 04:14:36,387 - INFO - Connection closed.
+2025-12-29 04:14:36,388 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:16:57,868 - INFO - Connect successful!
+2025-12-29 04:16:58,120 - INFO - Connection closed.
+2025-12-29 04:16:58,121 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:17:32,165 - INFO - Connect successful!
+2025-12-29 04:17:32,422 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:17:33,900 - INFO - Connection closed.
+2025-12-29 04:18:25,000 - INFO - Connect successful!
+2025-12-29 04:18:25,266 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:18:25,401 - INFO - Connection closed.
+2025-12-29 04:20:39,526 - INFO - Connect successful!
+2025-12-29 04:20:39,814 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:20:39,962 - INFO - Connection closed.
+2025-12-29 04:21:58,252 - INFO - Connect successful!
+2025-12-29 04:21:58,490 - INFO - List of Schemas: ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:21:58,770 - INFO - Created tables based on ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:21:59,128 - INFO - Created tables based on ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:21:59,569 - INFO - Created tables based on ['users.sql', 'workoutsession.sql', 'exercisesets.sql']
+2025-12-29 04:21:59,571 - INFO - Connection closed.
