@@ -23,13 +23,20 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
+    # Keycloak
+    KEYCLOAK_URL: str
+    KEYCLOAK_ADMIN_USERNAME: str
+    KEYCLOAK_ADMIN_PASSWORD: str
+
+    # Database Schema Folder
+    DB_SCHEMA: str = "app/database/schema"
+
     model_config = SettingsConfigDict(
         env_file=".env",           
         env_file_encoding="utf-8",
         extra="ignore"            
     )
     
-
 
 # Instance
 setting = Settings()

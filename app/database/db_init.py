@@ -21,6 +21,20 @@ class DBManger:
         self.dbname = setting.DB_NAME
         self.connection = None
         self.schemas = setting.DB_SCHEMA
+        self.db_create_connection()
+
+    def db_create_connection(self):
+        try:
+            self.connection = psycopg2.connect(
+                user = self.user,
+                password = self.password,
+                host = self.host,
+                port = self.port,
+                dbname = self.dbname
+            )
+            logging.info("Connect successful!")
+        except Exception as e:
+            raise Exception("Connection Failed!")
 
     def db_connection_test(self):
         try:
@@ -83,6 +97,15 @@ class DBManger:
             pass 
         except Exception as e:
             print(f"Failed to migrate: {e}")
+
+    def db_connection(self):
+        try:
+            self.db_create_connection()
+            return self.connection
+        except Exception as e:
+            logging.error("DB Connection Failed!")
+
+
 
 
 if __name__ == "__main__":
