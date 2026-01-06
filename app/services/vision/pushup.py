@@ -3,11 +3,13 @@ import numpy as np
 import math
 from ultralytics import YOLO
 from app.config.settings import setting
+from app.config.device import DEVICE  
 
 class PushupMonitor:
     def __init__(self, model_path=None):
         path = model_path or setting.MODEL_PATH
         self.model = YOLO(path)
+        self.model.to(DEVICE)  
         
         # Pushup counter state
         self.pushup_count = 0
@@ -27,7 +29,7 @@ class PushupMonitor:
     
     def process_frame(self, frame):
         """Process frame with tracking"""
-        results = self.model.track(frame, persist=True)
+        results = self.model.track(frame, persist=True, device=DEVICE, verbose=False)  
         return results
 
     def calculate_angle(self, p1, p2, p3):
@@ -231,7 +233,7 @@ class PushupMonitor:
                 frame = self.draw_skeleton(frame, keypoints, confidence, used_side)
             
             # Draw overlay (count + state)
-            frame = self.draw_modern_overlay(frame, self.pushup_count, state)
+            # frame = self.draw_modern_overlay(frame, self.pushup_count, state)
             
             return frame
             
@@ -256,6 +258,8 @@ class PushupMonitor:
 if __name__ == "__main__":
     monitor = PushupMonitor()
     cap = cv2.VideoCapture('/Users/ananthakrishnab/Desktop/Screen Recording 2025-12-22 at 10.13.03.mov')
+    # cap = cv2.VideoCapture(0)
+
     
     while True:
         success, frame = cap.read()

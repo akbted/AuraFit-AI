@@ -326,7 +326,7 @@ class SquatMonitor:
 
 if __name__ == "__main__":
     monitor = SquatMonitor()
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('/Users/ananthakrishnab/Desktop/Screen Recording 2026-01-03 at 09.16.55.mov')
     
     while True:
         success, frame = cap.read()

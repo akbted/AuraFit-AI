@@ -285,7 +285,7 @@ class LegRaiseMonitor:
 
 if __name__ == "__main__":
     monitor = LegRaiseMonitor()
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('/Users/ananthakrishnab/Desktop/Screen Recording 2026-01-03 at 09.05.26.mov')
     
     while True:
         success, frame = cap.read()

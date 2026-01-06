@@ -271,7 +271,8 @@ class CrunchMonitor:
 
 if __name__ == "__main__":
     monitor = CrunchMonitor()
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('/Users/ananthakrishnab/Desktop/Screen Recording 2025-12-24 at 22.37.23.mov')
     
     while True:
         success, frame = cap.read()

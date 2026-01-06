@@ -279,10 +279,17 @@ class CompetitionMonitor:
         
         # Assign player colors based on sorted track_id
         sorted_ids = sorted(track_ids)
-        player_colors = {
-            sorted_ids[0]: (67, 245, 66) if len(sorted_ids) > 0 else (255, 255, 255),   # Green
-            sorted_ids[1]: (255, 165, 0) if len(sorted_ids) > 1 else (255, 255, 255),   # Orange
-        }
+        
+        # Build color map safely
+        player_colors = {}
+        color_palette = [
+            (67, 245, 66),   # Player 1 - Green
+            (255, 165, 0),   # Player 2 - Orange
+            (245, 66, 245),  # Player 3 - Magenta
+            (66, 135, 245),  # Player 4 - Blue
+        ]
+        for i, pid in enumerate(sorted_ids):
+            player_colors[pid] = color_palette[i % len(color_palette)]
         
         for idx, track_id in enumerate(track_ids):
             if not hasattr(results[0], "keypoints") or len(results[0].keypoints) <= idx:
@@ -307,7 +314,7 @@ class CompetitionMonitor:
 
 if __name__ == "__main__":
     monitor = CompetitionMonitor(exercise_type="pushup")
-    cap = cv2.VideoCapture('/Users/ananthakrishnab/Desktop/Screen Recording 2025-12-22 at 14.26.51.mov')
+    cap = cv2.VideoCapture(0)
     
     print(f"Starting {monitor.exercise_type.upper()} competition...")
     print(f"Thresholds: DOWN<{monitor.DOWN_ANGLE}°, UP>{monitor.UP_ANGLE}°")
