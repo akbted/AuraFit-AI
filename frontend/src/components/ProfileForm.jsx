@@ -9,12 +9,13 @@ import { useAuth } from '../context/AuthContext';
  */
 const ProfileForm = ({ isRegistration = false, onNavigate }) => {
   const { user, register } = useAuth();
-  
+
   const [formData, setFormData] = useState({
-    name: user?.name || '', 
-    age: user?.age || '', 
-    gender: user?.gender || '', 
-    height: user?.height || '', 
+    name: user?.name || '',
+    email: user?.email || '', // Added email field
+    age: user?.age || '',
+    gender: user?.gender || '',
+    height: user?.height || '',
     weight: user?.weight || '',
     medicalConditions: user?.medicalConditions || { heartIssues: false, diabetes: false, jointPain: false }
   });
@@ -40,7 +41,7 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
   }, [formData.height, formData.weight]);
 
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  
+
   const handleCheckboxChange = (key) => {
     setFormData(prev => ({
       ...prev,
@@ -48,15 +49,42 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (isRegistration) {
-      // Register via context
-      register(formData);
-      // Main App component should handle the redirect based on auth state change
+      // ============================================
+      // 🔧 BACKEND INTEGRATION POINT - REGISTRATION
+      // ============================================
+      // This calls the register function in AuthContext
+      // Update AuthContext.jsx to add your backend API call
+      // ============================================
+      await register(formData);
+      // Main App component handles redirect based on auth state change
     } else {
+      // ============================================
+      // 🔧 BACKEND INTEGRATION POINT - PROFILE UPDATE
+      // ============================================
+      // TODO: Add API call to update user profile
+      // Example:
+      // try {
+      //   const response = await fetch('/api/user/profile', {
+      //     method: 'PUT',
+      //     headers: { 
+      //       'Content-Type': 'application/json',
+      //       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      //     },
+      //     body: JSON.stringify(formData)
+      //   });
+      //   if (response.ok) {
+      //     // Update local user state
+      //     alert('Profile updated successfully!');
+      //   }
+      // } catch (error) {
+      //   console.error('Profile update failed:', error);
+      // }
+      // ============================================
       console.log('Profile Updated:', formData);
-      // In a real app, updateProfile(formData)
     }
   };
 
@@ -71,9 +99,9 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
 
   return (
     <div className={isRegistration ? "min-h-screen bg-white flex flex-col items-center justify-center p-4" : "max-w-3xl mx-auto py-8"}>
-      
+
       {isRegistration && (
-        <button 
+        <button
           onClick={() => onNavigate('landing')}
           className="absolute top-6 left-6 text-slate-500 hover:text-blue-600 flex items-center gap-2 font-medium"
         >
@@ -84,7 +112,7 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
       <div className={isRegistration ? "w-full max-w-2xl" : ""}>
         <div className="text-center mb-10">
           {isRegistration && (
-             <h3 className="text-blue-600 font-bold mb-2 uppercase tracking-wider text-sm">AuraFit Registration</h3>
+            <h3 className="text-blue-600 font-bold mb-2 uppercase tracking-wider text-sm">AuraFit Registration</h3>
           )}
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             {isRegistration ? "Create Your Account" : "Your Profile"}
@@ -97,7 +125,7 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              
+
               {/* Personal Info */}
               <section>
                 <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
@@ -106,18 +134,28 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} 
+                    <input type="text" name="name" value={formData.name} onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                       placeholder="e.g. Alex Morgan" required />
                   </div>
+
+                  {isRegistration && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                        placeholder="e.g. alex@example.com" required />
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Age</label>
-                    <input type="number" name="age" value={formData.age} onChange={handleInputChange} 
+                    <input type="number" name="age" value={formData.age} onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Gender</label>
-                    <select name="gender" value={formData.gender} onChange={handleInputChange} 
+                    <select name="gender" value={formData.gender} onChange={handleInputChange}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" required>
                       <option value="">Select</option>
                       <option value="male">Male</option>
@@ -135,16 +173,16 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   <div className="space-y-6">
-                     <div>
+                    <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Height (cm)</label>
-                      <input type="number" name="height" value={formData.height} onChange={handleInputChange} 
+                      <input type="number" name="height" value={formData.height} onChange={handleInputChange}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" required />
-                     </div>
-                     <div>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">Weight (kg)</label>
-                      <input type="number" name="weight" value={formData.weight} onChange={handleInputChange} 
+                      <input type="number" name="weight" value={formData.weight} onChange={handleInputChange}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" required />
-                     </div>
+                    </div>
                   </div>
 
                   {/* BMI Card */}
@@ -164,10 +202,10 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
                   <Heart className="w-5 h-5 text-blue-600" /> Health Conditions
                 </h2>
                 <div className="space-y-3">
-                  { Object.entries({ heartIssues: 'Heart Condition', diabetes: 'Diabetes', jointPain: 'Joint Pain' }).map(([key, label]) => (
+                  {Object.entries({ heartIssues: 'Heart Condition', diabetes: 'Diabetes', jointPain: 'Joint Pain' }).map(([key, label]) => (
                     <label key={key} className="flex items-center p-4 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
-                      <input type="checkbox" checked={formData.medicalConditions[key]} onChange={() => handleCheckboxChange(key)} 
-                         className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
+                      <input type="checkbox" checked={formData.medicalConditions[key]} onChange={() => handleCheckboxChange(key)}
+                        className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
                       <span className="ml-3 font-medium text-slate-700">{label}</span>
                     </label>
                   ))}
@@ -175,15 +213,15 @@ const ProfileForm = ({ isRegistration = false, onNavigate }) => {
               </section>
 
               <div className="pt-4 border-t border-slate-100">
-                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                   {isRegistration ? "Create Account & Start" : "Save Changes"}
-                 </button>
-                 
-                 {isRegistration && (
-                   <p className="text-center mt-4 text-sm text-slate-500">
-                     Already have an account? <button type="button" onClick={() => onNavigate('login')} className="text-blue-600 font-bold hover:underline">Sign In</button>
-                   </p>
-                 )}
+                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  {isRegistration ? "Create Account & Start" : "Save Changes"}
+                </button>
+
+                {isRegistration && (
+                  <p className="text-center mt-4 text-sm text-slate-500">
+                    Already have an account? <button type="button" onClick={() => onNavigate('login')} className="text-blue-600 font-bold hover:underline">Sign In</button>
+                  </p>
+                )}
               </div>
 
             </form>

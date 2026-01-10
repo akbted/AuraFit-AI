@@ -57,6 +57,12 @@ const Login = ({ onNavigate }) => {
                 </div>
               )}
 
+              {/* Dummy Login Hint */}
+              <div className="p-4 bg-blue-50 text-blue-700 rounded-xl text-sm">
+                <p className="font-semibold mb-1">💡 Demo Mode Active</p>
+                <p className="text-blue-600">Enter any email and password to login and test the app!</p>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Email Address</label>
                 <div className="relative">
@@ -105,19 +111,19 @@ const Login = ({ onNavigate }) => {
 
           <div className="mt-8 text-center text-sm text-slate-500">
             Don't have an account?{' '}
-            <button 
+            <button
               onClick={() => onNavigate('register')}
               className="text-blue-600 font-bold hover:underline"
             >
               Sign Up
             </button>
             <div className="mt-4">
-               <button 
-                 onClick={() => onNavigate('demo')}
-                 className="text-slate-400 hover:text-slate-600 transition-colors"
-               >
-                 Try Demo Mode
-               </button>
+              <button
+                onClick={() => onNavigate('demo')}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Try Demo Mode
+              </button>
             </div>
           </div>
         </div>
