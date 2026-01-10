@@ -1,7 +1,27 @@
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, Flame, Clock, Trophy, MoreHorizontal, TrendingUp } from 'lucide-react';
+import { Activity, Flame, Clock, Trophy, MoreHorizontal, TrendingUp, AlertCircle, ArrowRight } from 'lucide-react';
 
 const Dashboard = ({ onNavigate }) => {
+  const [hasCompletedAssessment, setHasCompletedAssessment] = useState(false);
+
+  useEffect(() => {
+    try {
+      const assessment = localStorage.getItem('fitnessAssessment_v2');
+      if (assessment) {
+        const parsed = JSON.parse(assessment);
+        // Only consider complete if we have actual results
+        if (parsed && parsed.results && Object.keys(parsed.results).length > 0) {
+          setHasCompletedAssessment(true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing assessment data', e);
+    }
+    setHasCompletedAssessment(false); // Default to false if missing or invalid
+  }, []);
+
   // Mock Data for the Activity Chart
   const activityData = [
     { name: 'Mon', calories: 240, active: 40 },
@@ -59,6 +79,32 @@ const Dashboard = ({ onNavigate }) => {
           </button>
         </div>
       </div>
+
+      {/* Assessment Reminder Ticket */}
+      {!hasCompletedAssessment && (
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group">
+          <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-5 rounded-full transform translate-x-1/2 -translate-y-1/2" />
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <AlertCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold mb-1">Assessment Not Completed</h3>
+                <p className="text-blue-100 text-sm max-w-xl">
+                  Please take your fitness assessment to get accurate, personalized workout suggestions and track your progress effectively.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigate && onNavigate('assessment')}
+              className="whitespace-nowrap bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-blue-50 transition-colors flex items-center gap-2"
+            >
+              Take Assessment <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

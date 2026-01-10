@@ -1,4 +1,4 @@
-import { Home, Dumbbell, Users, User, LogOut, Menu, X, Bell, Search, Trophy, Sparkles } from 'lucide-react';
+import { Home, Dumbbell, Users, User, LogOut, Menu, X, Bell, Search, Trophy, Sparkles, ClipboardCheck } from 'lucide-react';
 import { useState } from 'react';
 
 const DashboardLayout = ({ children, currentView, onViewChange, onLogout }) => {
@@ -11,6 +11,7 @@ const DashboardLayout = ({ children, currentView, onViewChange, onLogout }) => {
     { id: 'compete', label: 'Competition Mode', icon: Users },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'suggestions', label: 'AI Suggestions', icon: Sparkles },
+    { id: 'assessment', label: 'Fitness Assessment', icon: ClipboardCheck },
     { id: 'profile', label: 'My Profile', icon: User },
   ];
 

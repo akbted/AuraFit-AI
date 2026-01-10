@@ -10,6 +10,7 @@ import CompeteMode from './components/CompeteMode';
 import Leaderboard from './components/Leaderboard';
 import Suggestions from './components/Suggestions';
 import ChatbotWidget from './components/ChatbotWidget';
+import FitnessAssessment from './components/FitnessAssessment';
 
 // Main App Controller
 const AppContent = () => {
@@ -44,10 +45,17 @@ const AppContent = () => {
     setCurrentView('landing');
   };
 
+  const handleAssessmentComplete = (assessmentData) => {
+    setCurrentView('home');
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-slate-500">
-        Loading AuraFit...
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4 mx-auto" />
+          <p className="text-slate-600 font-medium">Loading AuraFit...</p>
+        </div>
       </div>
     );
   }
@@ -95,6 +103,7 @@ const AppContent = () => {
         {currentView === 'compete' && <CompeteMode />}
         {currentView === 'leaderboard' && <Leaderboard />}
         {currentView === 'suggestions' && <Suggestions />}
+        {currentView === 'assessment' && <FitnessAssessment onComplete={handleAssessmentComplete} />}
       </DashboardLayout>
 
       {/* Global Floating Chatbot Widget */}
