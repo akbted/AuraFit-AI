@@ -1,8 +1,33 @@
-import { Home, Dumbbell, Users, User, LogOut, Menu, X, Bell, Search, Trophy, Sparkles, ClipboardCheck } from 'lucide-react';
-import { useState } from 'react';
+import { Home, Dumbbell, Users, User, LogOut, Menu, X, Bell, Search, Trophy, Sparkles, ClipboardCheck, Mic, MicOff } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { useVoiceCommands } from '../hooks/useVoiceCommands';
 
 const DashboardLayout = ({ children, currentView, onViewChange, onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Global Voice Command Handler
+  const handleVoiceCommand = useCallback((action, rawCommand) => {
+    console.log('Global Voice Command:', action);
+
+    // Map commands to view IDs
+    const viewMap = {
+      home: 'home',
+      dashboard: 'home',
+      workout: 'workout',
+      start: 'workout', // Quick start
+      compete: 'compete',
+      leaderboard: 'leaderboard',
+      suggestions: 'suggestions',
+      assessment: 'assessment',
+      profile: 'profile'
+    };
+
+    if (viewMap[action]) {
+      onViewChange(viewMap[action]);
+    }
+  }, [onViewChange]);
+
+  const { isListening, isSupported, toggleListening } = useVoiceCommands(handleVoiceCommand);
 
   // Navigation Items
   const navItems = [
@@ -112,6 +137,23 @@ const DashboardLayout = ({ children, currentView, onViewChange, onLogout }) => {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Voice Control Button */}
+            {isSupported && (
+              <button
+                onClick={toggleListening}
+                className={`p-2 rounded-full transition-all duration-300 flex items-center gap-2 px-3 ${isListening
+                  ? 'bg-red-500/10 text-red-500 ring-2 ring-red-500/20'
+                  : 'text-slate-400 hover:bg-slate-50'
+                  }`}
+                title="Voice Control"
+              >
+                {isListening ? <Mic className="w-5 h-5 animate-pulse" /> : <MicOff className="w-5 h-5" />}
+                <span className={`text-xs font-medium hidden md:block ${isListening ? 'text-red-500' : 'text-slate-500'}`}>
+                  {isListening ? 'Listening...' : 'Voice'}
+                </span>
+              </button>
+            )}
+
             <button className="relative p-2 text-slate-400 hover:bg-slate-50 rounded-full transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
@@ -126,8 +168,8 @@ const DashboardLayout = ({ children, currentView, onViewChange, onLogout }) => {
           </div>
         </main>
 
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
